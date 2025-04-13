@@ -1,0 +1,147 @@
+﻿@page "{id:int}"
+@using ProjektHantering.Models
+@using static ProjektHantering.Models.Project
+@model ProjektHantering.Pages.Projects.EditModel
+@{
+    ViewData["Title"] = "Redigera projekt";
+}
+
+<div class="container">
+    <h1>Redigera projekt</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <form method="post" id="editProjectForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <input type="hidden" asp-for="Project.Id" />
+                <input type="hidden" asp-for="Project.UserId" />
+
+                <div class="mb-3">
+                    <label asp-for="Project.Name" class="form-label">Projektnamn</label>
+                    <input asp-for="Project.Name" class="form-control" />
+                    <span asp-validation-for="Project.Name" class="text-danger"></span>
+                    <div id="nameError" class="text-danger"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Project.Description" class="form-label">Beskrivning</label>
+                    <textarea asp-for="Project.Description" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Project.Description" class="text-danger"></span>
+                    <div id="descriptionError" class="text-danger"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Project.StartDate" class="form-label">Startdatum</label>
+                    <input asp-for="Project.StartDate" class="form-control" type="date" />
+                    <span asp-validation-for="Project.StartDate" class="text-danger"></span>
+                    <div id="startDateError" class="text-danger"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Project.EndDate" class="form-label">Slutdatum (valfritt)</label>
+                    <input asp-for="Project.EndDate" class="form-control" type="date" />
+                    <span asp-validation-for="Project.EndDate" class="text-danger"></span>
+                    <div id="endDateError" class="text-danger"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Project.Status" class="form-label">Status</label>
+                    <select asp-for="Project.Status" asp-items="Html.GetEnumSelectList<ProjectStatus>()" class="form-select"></select>
+                    <span asp-validation-for="Project.Status" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary">Spara ändringar</button>
+                    <a asp-page="./Index" class="btn btn-secondary">Tillbaka till listan</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        // JavaScript-validering för formuläret
+        document.getElementById('editProjectForm').addEventListener('submit', function(event) {
+            let isValid = true;
+            const nameInput = document.getElementById('Project_Name');
+            const descriptionInput = document.getElementById('Project_Description');
+            const startDateInput = document.getElementById('Project_StartDate');
+            const endDateInput = document.getElementById('Project_EndDate');
+
+            // Återställ felmeddelanden
+            document.getElementById('nameError').textContent = '';
+            document.getElementById('descriptionError').textContent = '';
+            document.getElementById('startDateError').textContent = '';
+            document.getElementById('endDateError').textContent = '';
+
+            // Validera projektnamn
+            if (!nameInput.value.trim()) {
+                document.getElementById('nameError').textContent = 'Projektnamn måste anges';
+                isValid = false;
+            } else if (nameInput.value.length > 100) {
+                document.getElementById('nameError').textContent = 'Projektnamn får inte vara längre än 100 tecken';
+                isValid = false;
+            }
+
+            // Validera beskrivning
+            if (!descriptionInput.value.trim()) {
+                document.getElementById('descriptionError').textContent = 'Beskrivning måste anges';
+                isValid = false;
+            }
+
+            // Validera startdatum
+            if (!startDateInput.value) {
+                document.getElementById('startDateError').textContent = 'Startdatum måste anges';
+                isValid = false;
+            }
+
+            // Validera slutdatum om det är angivet
+            if (endDateInput.value && new Date(endDateInput.value) < new Date(startDateInput.value)) {
+                document.getElementById('endDateError').textContent = 'Slutdatum kan inte vara tidigare än startdatum';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+
+        // Edit project function
+        async function editProject(id) {
+            try {
+                const response = await fetch(`/api/projects/${id}`);
+                if (!response.ok) throw new Error('Failed to fetch project');
+
+                const project = await response.json();
+
+                // Populate edit form
+                document.getElementById('editProjectId').value = project.id;
+                document.getElementById('editProjectUserId').value = project.userId;
+                document.getElementById('editProjectName').value = project.name;
+                document.getElementById('editClientName').value = project.clientName || '';
+                document.getElementById('editProjectDescription').value = project.description;
+                document.getElementById('editStartDate').value = new Date(project.startDate).toISOString().split('T')[0];
+                document.getElementById('editEndDate').value = project.endDate ? new Date(project.endDate).toISOString().split('T')[0] : '';
+                document.getElementById('editBudget').value = project.budget || 0;
+
+                // Sätt status i dropdown
+                document.getElementById('editProjectStatus').value = project.status;
+
+                document.getElementById('editProjectInitial').textContent = project.name.charAt(0).toUpperCase();
+
+                // Show modal
+                document.getElementById('editProjectModal').classList.add('show');
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Could not load project details');
+            }
+        }
+        });
+    </script>
+}

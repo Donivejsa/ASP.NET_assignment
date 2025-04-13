@@ -1,0 +1,100 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Project Management</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Comfortaa:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="logo">
+                        <span class="logo-icon">
+                            <img src="~/images/logo.png" alt="Alpha logo" />
+                        </span>
+                        <span class="logo-text" style="font-family: 'Comfortaa', cursive; font-weight: 700; font-size: 26px; color: #232133; letter-spacing: 0;">alpha</span>
+                    </div>
+                </div>
+                <div class="sidebar-menu">
+                    <a asp-page="/Projects/Index" class="menu-item @(ViewContext.RouteData.Values["Page"].ToString().Contains("/Projects") ? "active" : "")">
+                        <i class="bi bi-kanban-fill"></i>
+                        <span>Projects</span>
+                    </a>
+                </div>
+            </div>
+        }
+
+        <div class="content-container">
+            <div class="content-header">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="content-title">@ViewData["Title"]</div>
+                    <div class="user-menu">
+                        <div class="user-avatar" id="userAvatarButton">
+                            <img src="~/images/avatar.png" alt="User Avatar" />
+                        </div>
+                        <div class="dropdown-menu" id="userDropdown">
+                            <div class="dropdown-header">
+                                <div class="user-avatar-small">
+                                    <img src="~/images/avatar.png" alt="User Avatar" />
+                                </div>
+                                <div class="user-info">
+                                    <span class="user-name">@User.Identity.Name</span>
+                                </div>
+                            </div>
+                            <div class="dropdown-item">
+                                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Account/Login", new { area = "Identity" })">
+                                    <button type="submit" class="btn-logout">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="content-body">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userAvatarButton = document.getElementById('userAvatarButton');
+            const userDropdown = document.getElementById('userDropdown');
+
+            if (userAvatarButton && userDropdown) {
+                userAvatarButton.addEventListener('click', function() {
+                    userDropdown.classList.toggle('show');
+                });
+
+                document.addEventListener('click', function(event) {
+                    if (!userAvatarButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+﻿@page
+@model ProjektHantering.Pages.DebugModel
+@{
+    ViewData["Title"] = "Database Debug";
+}
+
+<h1>Database Connection Test</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Database Status</div>
+            <div class="card-body">
+                <p>Can connect to database: <strong>@Model.CanConnect</strong></p>
+                <p>Current project count: <strong>@Model.ProjectCount</strong></p>
+            </div>
+        </div>
+
+        <form method="post">
+            <button type="submit" class="btn btn-primary mb-4">Create Test Project</button>
+        </form>
+
+        @if (Model.CreatedProject != null)
+        {
+            <div class="alert alert-success">
+                <h4>Test Project Created!</h4>
+                <p>ID: @Model.CreatedProject.Id</p>
+                <p>Name: @Model.CreatedProject.Name</p>
+                <p>Current project count: <strong>@Model.ProjectCount</strong></p>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">
+                <h4>Error</h4>
+                <p>@Model.ErrorMessage</p>
+            </div>
+        }
+    </div>
+</div>
